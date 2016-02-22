@@ -1,0 +1,134 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Charting Tool</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" media="screen" href="/static/css/handsontable.full.min.css">
+    
+    <script type="text/javascript" src="/static/js/jquery-1.12.0.min.js"></script>
+    <script src="/static/js/handsontable.full.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script>
+	    $(function(){
+	        $('#submit').on('click', function(e){
+	        	var $data_array = hot.getData();
+	        	$.ajax({
+	        		url: '/',
+	        		type: 'post',
+	        		data: {input_data: JSON.stringify($data_array),
+	        			title: $('#title').val(),
+	        			subtitle: $('#subtitle').val(),
+	        			yaxisunit: $('#yaxisunit').val(),
+	        			chart_type: $('#chart_type').val(),
+	        		},
+	        		dataType: 'json',
+	        		success: function (response) {
+	        			console.log(response);
+	        			$(function () {
+						    $('#graph1').highcharts({
+						        chart: {
+							        type: response.chart_type,
+							    },
+						        title: {text: response.title, x: -20},
+						        subtitle: {text: response.subtitle, x: -20},
+						        xAxis: {
+						            categories: response.categories,
+						            title: {text: response.category_text}
+						        },
+						        yAxis: {
+						            title: {text: response.yaxisunit},
+						            plotLines: [{
+						                value: 0,
+						                width: 1,
+						                color: '#808080'
+						            }]
+						        },
+						        series: response.series
+						    });
+						});
+	                },
+	                error: function (response) {
+	                    alert('An error occured - we are working to fix it!');
+	                },
+		        });
+		    });
+        });
+    </script>
+  </head>
+  <body>
+  	<nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Interactive Charts</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Plot<span class="sr-only">(current)</span></a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4">
+	        <div class="input-group">
+			  <label for="title">Title of your graph</label>
+			  <input class="form-control" id="title" type="text">
+			</div><br>
+
+			<div class="input-group">
+			  <label for="subtitle">Subtitle/Source</label>
+			  <input class="form-control" id="subtitle" type="text">
+			</div><br>
+
+			<div class="input-group">
+			  <label for="yaxisunit">Y-Axis Unit</label>
+			  <input class="form-control" id="yaxisunit" type="text">
+			</div><br>
+
+			<div class="input-group">
+			  <label for="chart_type">Chart Type</label>
+			  <select class="form-control" name="chart_type" id="chart_type">
+	            <option>bar</option>
+	            <option>column</option>
+	            <option>line</option>
+	            <option>pie</option>
+	          </select><br>
+            </div>			
+	        
+	        <h4>Enter your data</h4>
+	        <div id="spreadsheet" style="height: 500px; width: 100%; overflow: hidden"></div>
+	        <button id="submit" value="submit">Submit</button>
+	    </div>
+        <div class="col-lg-8">
+	        <div id="graph1" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+	    </div>
+      </div>
+    </div>
+  </body>
+  <script>
+	var container = document.getElementById('spreadsheet');
+	var hot = new Handsontable(container,{minSpareCols: 1,
+		minSpareRows: 1,
+		rowHeaders: true,
+		colHeaders: true,
+		contextMenu: true,
+		columnSorting: true,
+		stretchH:"all"});
+  </script>
+</html>
